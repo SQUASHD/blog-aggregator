@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 type apiConfig struct {
@@ -18,6 +19,7 @@ type apiConfig struct {
 }
 
 func main() {
+
 	err := godotenv.Load()
 	if err != nil {
 		panic(err)
@@ -60,10 +62,14 @@ func main() {
 	v1.Get("/feeds", config.handleGetFeeds)
 	v1.Post("/feeds", config.middlewareAuth(config.handleCreateFeed))
 
+	v1.Get("/posts", config.middlewareAuth(config.handleGetPosts))
+
 	v1.Get("/feed-follows", config.middlewareAuth(config.handleGetAllFeedsForUser))
 	v1.Post("/feed-follows", config.middlewareAuth(config.handleCreateFeedFollow))
 	v1.Delete("/feed-follows/{feedFollowId}", config.handleDeleteFeedFollow)
 	router.Mount("/v1", v1)
+
+	go startScraping(config.DB, 10, 10*time.Minute)
 
 	server := &http.Server{
 		Handler: router,

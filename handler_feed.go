@@ -27,10 +27,6 @@ func (c *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, use
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
 	err := decoder.Decode(&params)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters")
-		return
-	}
 
 	feed, err := c.DB.CreateFeed(r.Context(), database.CreateFeedParams{
 		ID:        uuid.New(),
@@ -45,5 +41,7 @@ func (c *apiConfig) handleCreateFeed(w http.ResponseWriter, r *http.Request, use
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, feed)
+	formattedFeed := databaseFeedToFeed(feed)
+
+	respondWithJSON(w, http.StatusCreated, formattedFeed)
 }

@@ -31,6 +31,7 @@ type Feed struct {
 	Name      string    `json:"name"`
 	Url       string    `json:"url"`
 	UserID    uuid.UUID `json:"user_id"`
+	LastFetch time.Time `json:"last_fetched_at"`
 }
 
 func databaseFeedToFeed(feed database.Feed) Feed {
@@ -41,5 +42,24 @@ func databaseFeedToFeed(feed database.Feed) Feed {
 		Name:      feed.Name,
 		Url:       feed.Url,
 		UserID:    feed.UserID,
+		LastFetch: feed.LastFetchedAt.Time,
 	}
+}
+
+type RSSFeed struct {
+	Channel struct {
+		Text        string    `xml:",chardata"`
+		Title       string    `xml:"title"`
+		Link        string    `xml:"link"`
+		Description string    `xml:"description"`
+		Item        []RSSItem `xml:"item"`
+	} `xml:"channel"`
+}
+
+type RSSItem struct {
+	Text        string `xml:",chardata"`
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
 }
